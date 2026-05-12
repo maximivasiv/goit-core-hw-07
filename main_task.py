@@ -1,3 +1,4 @@
+import pickle
 from collections import UserDict
 from datetime import datetime, timedelta
 
@@ -34,7 +35,6 @@ class Phone(Field):
 class Birthday(Field):
     def __init__(self, value):
         try:
-
             datetime.strptime(value, "%d.%m.%Y")
             super().__init__(value)
         except ValueError:
@@ -174,8 +174,19 @@ def birthdays(book):
         return "No upcoming birthdays in the next 7 days."
     return "\n".join(f"{item['name']}: {item['birthday']}" for item in upcoming)
 
+def save_data(book, filename="addressbook.pkl"):
+    with open(filename, "wb") as f:
+        pickle.dump(book, f)
+
+def load_data(filename="addressbook.pkl"):
+    try:
+        with open(filename, "rb") as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        return AddressBook() 
+
 def main():
-    book = AddressBook()
+    book = load_data()
     print("Welcome to the assistant bot!")
     while True:
         user_input = input("Enter a command: ")
@@ -185,6 +196,7 @@ def main():
         command, *args = parse_input(user_input)
 
         if command in ["close", "exit"]:
+            save_data(book)
             print("Good bye!")
             break
         elif command == "hello":
@@ -208,4 +220,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
